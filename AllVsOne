@@ -1,0 +1,175 @@
+Spieler spieler;
+ArrayList<Gegner> gegner;
+boolean Start;
+boolean Spiel;
+boolean Verloren;
+void setup() {
+  gegner = new ArrayList<Gegner>();
+  spieler = new Spieler();
+  for(int i = 0; i < gegner.size(); i++){
+    gegner.remove(i);
+  }
+  Start = true;
+  Spiel = false;
+  Verloren = false;
+  size(600, 600);
+  textAlign(CENTER, CENTER);
+  rectMode(CENTER);
+}
+void draw() {
+  if (Start == true) {
+    if(keyPressed){
+      if(key == ' '){
+        gegner.add(new Gegner());
+      }
+      if(key == 'r' || key == 'R'){
+        Start = false;
+        Spiel = true;
+      }
+    }
+    background(0);
+    for (int i = 10; i < 600; i += 20) {
+      for (int y = 10; y < 600; y += 20) {
+        noFill();
+        stroke(255);
+        rect(i, y, 20, 20);
+      }
+    }
+    for(int i = 0; i < gegner.size(); i++){
+      Gegner g = gegner.get(i);
+      g.StartUpdate();
+    }
+    spieler.StartUpdate();
+  }else if(Spiel == true){
+    background(0);
+    spieler.SpielUpdate();
+    for(int i = 0; i < gegner.size(); i++){
+      Gegner g = gegner.get(i);
+      g.SpielUpdate();
+      if(g.gibX() + 10 <= spieler.gibX() + 10 && g.gibX() - 10 >= spieler.gibX() - 10){
+        if(g.gibY() + 10 <= spieler.gibY() + 10 && g.gibY() -10 >= spieler.gibY() - 10){
+          Spiel = false;
+          Verloren = true;
+        }
+      }
+    }
+  }else if(Verloren == true){
+    textSize(100);
+    fill(255, 0, 0);
+    text("VERLOREN", width/2, height/10);
+    textSize(50);
+    fill(255);
+    text("AGAIN-?", width/2, height/4);
+    textSize(20);
+    text("Press-Q", width/2, height/3);
+    if(keyPressed){
+      if(key == 'q' || key == 'Q'){
+        setup();
+      }
+    }
+  }
+}
+class Gegner{
+  PVector loc;
+  PVector G; //Größe
+  float zeit = 0;
+  float x = spieler.loc.x;
+  float y = spieler.loc.y;
+  Gegner(){
+    loc = new PVector(spieler.loc.x, spieler.loc.y);
+    G = new PVector(20, 20);
+  }
+  void StartUpdate(){
+    zeichne();
+  }
+  void SpielUpdate(){
+    zeichne();
+    SpielBewege();
+    zeit += (1/frameRate);
+  }
+  void SpielBewege(){
+    float xx = spieler.loc.x - loc.x;
+    float yy = spieler.loc.y - loc.y;
+    xx = constrain(xx, -3.5, 3.5);
+    yy = constrain(yy, -3.5, 3.5);
+    loc.add(xx, yy);
+    if(zeit >= 10){
+      loc.x = x;
+      loc.y = y;
+      zeit = 0;
+    }
+  }
+  void zeichne(){
+    fill(255, 0, 0);
+    noStroke();
+    ellipse(loc.x, loc.y, G.x, G.y);
+  }
+  float gibX(){
+    return loc.x;
+  }
+  float gibY(){
+    return loc.y;
+  }
+}
+class Spieler{
+  PVector loc;
+  PVector G;//Geschwindigkeit
+  Spieler(){
+    loc = new PVector(310, 310);
+    G = new PVector(20, 20);
+  }
+  void StartUpdate(){
+    zeichne();
+    StartBewege();
+  }
+  void SpielUpdate(){
+    zeichne();
+    SpielBewege();
+  }
+  void SpielBewege(){
+    float xx = mouseX - loc.x;
+    float yy = mouseY - loc.y;
+    xx = constrain(xx, -5, 5);
+    yy = constrain(yy, -5, 5);
+    loc.add(xx, yy);
+  }
+  void StartBewege(){
+    if(keyPressed){
+      if(key == 'w' || key == 'W'){
+        if(loc.y >= 30){
+          loc.y -= G.y;
+          delay(100);
+        }
+      }
+      if(key == 's' || key == 'S'){
+        if(loc.y <= 570){
+          loc.y += G.y;
+          delay(100);
+        }
+      }
+      if(key == 'a' || key == 'A'){
+        if(loc.x >= 30){
+          loc.x -= G.x;
+          delay(100);
+        }
+      }
+      if(key == 'd' || key == 'D'){
+        if(loc.x <= 570){
+          loc.x += G.x;
+          delay(100);
+        }
+      }
+    }
+  }
+  void zeichne(){
+    fill(0, 255, 0);
+    noStroke();
+    rect(loc.x, loc.y, 20, 20);
+  }
+  float gibX(){
+    return loc.x;
+  }
+  float gibY(){
+    return loc.y;
+  }
+}
